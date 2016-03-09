@@ -8,15 +8,22 @@
 
 import UIKit
 import Parse
+import ParseUI
+
+let userDidLogoutNotification = "userDidLogoutNotification"
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
         
         
         // Initialize Parse
@@ -29,9 +36,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 configuration.server = "https://radiant-plains-11928.herokuapp.com/parse"
             })
         )
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "userDidLogout", name: userDidLogoutNotification, object: nil)
+        if let currentUser = PFUser.currentUser() {
+            print("Logged in user detected: \(currentUser.username!)")
+            
+            let vc = storyboard.instantiateViewControllerWithIdentifier("tabBarController") as UIViewController
+            window?.rootViewController = vc
+            
+        } else {
+            // Let storyboard dictate initial view controller
+            print("No logged in user detected")
+        }
+
+        UITabBar.appearance().tintColor = UIColor.whiteColor()
+        
         return true
     }
-
+    func userDidLogout() {
+        // Go back to storyboard's initial view controller
+        let vc = storyboard.instantiateInitialViewController()! as UIViewController
+        window?.rootViewController = vc
+    }
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
